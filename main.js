@@ -114,6 +114,7 @@ function main() {
             }
         }
 
+        console.log('env.GITHUB_SHA', env.GITHUB_SHA);
         let newRefData = {
             ref:`refs/tags/${prefix}build-number-${nextBuildNumber}`,
             sha: env.GITHUB_SHA
