@@ -2,11 +2,12 @@
 const   https = require('https'),
         zlib = require('zlib'),
         fs = require('fs'),
-        env = process.env;
+        env = process.env,
+        exec = require('child_process').exec;
 
-function fail(message, exitCode=1) {
+function fail(message, exitCode = 1) {
     console.log(`::error::${message}`);
-    process.exit(1);
+    process.exit(exitCode);
 }
 
 function request(method, path, data, callback) {
@@ -70,7 +71,11 @@ function main() {
         console.log(`Build number already generated in earlier jobs, using build number ${buildNumber}...`);
         //Setting the output and a environment variable to new build number...
         fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${buildNumber}`);
-        console.log(`::set-output name=build_number::${buildNumber}`);
+        try {
+            exec(`echo "build_number=${buildNumber}" >> $GITHUB_OUTPUT`);
+        } catch (err) {
+            fail(`Failed to write build-number to output. Error: ${err}`);
+        }
         return;
     }
 
@@ -130,8 +135,13 @@ function main() {
             //fs.writeFileSync('$GITHUB_ENV', `BUILD_NUMBER=${nextBuildNumber}`);
             fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${nextBuildNumber}`);
 
-            console.log(`build_number=${nextBuildNumber} >> $GITHUB_OUTPUT`);
-            //Save to file so it can be used for next jobs...
+            try {
+                exec(`echo "build_number=${buildNumber}" >> $GITHUB_OUTPUT`);
+            } catch (err) {
+                fail(`Failed to write build-number to output. Error: ${err}`);
+            }
+
+            // Save to file so it can be used for next jobs...
             fs.writeFileSync('BUILD_NUMBER', nextBuildNumber.toString());
 
             //Cleanup
