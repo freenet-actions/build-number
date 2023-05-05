@@ -136,7 +136,7 @@ function main() {
             fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${nextBuildNumber}`);
 
             try {
-                exec(`echo "build_number=${buildNumber}" >> $GITHUB_OUTPUT`);
+                exec(`echo "build_number=${nextBuildNumber}" >> $GITHUB_OUTPUT`);
             } catch (err) {
                 fail(`Failed to write build-number to output. Error: ${err}`);
             }
